@@ -6,14 +6,15 @@ This repository is a small example of running C# directly from `.cs` files, with
 
 There are two independent apps:
 
-- `Api.cs` is an ASP.NET Core API. It exposes `GET /api/health`.
-- `App.cs` is a console app. It calls the API over HTTP and reads its JSON response.
+- `Api.cs` is an ASP.NET Core API. It exposes `GET /api/health` and `GET /api/products`.
+- `App.cs` is a console app. It calls the API over HTTP and reads its JSON responses.
 
 ```text
 App.cs  -- HTTP / JSON -->  Api.cs
 ```
 
 Keeping them separate shows how a client app talks to a real server without a direct project reference.
+The product list is kept in memory to keep this first example small; no database is needed.
 
 ## How file-based C# works
 
@@ -42,7 +43,7 @@ dotnet run .\App.cs
 
 The client should log `API health: ok`.
 
-You can also find example requests for both API routes in `Api.http`.
+You can also find example requests for the API endpoints in `Api.http`.
 
 ## Configuration and logging
 
@@ -72,5 +73,6 @@ Environment variables override values from `appsettings.json`. You do not need t
 4. Make the client call the API.
 5. Load configuration and add logging.
 6. Return JSON from the API and read it in the client.
+7. Return demo products and display them in the client.
 
-`HealthJsonContext` and `AppJsonContext` provide JSON metadata for the API and client. Each app keeps its own types because they communicate over HTTP, not through shared C# types.
+`ApiJsonContext` and `AppJsonContext` provide JSON metadata for the API and client. Each app keeps its own types because they communicate over HTTP, not through shared C# types.

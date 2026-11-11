@@ -4,5 +4,9 @@
 GET {{baseUrl}}/api/health
 Accept: application/json
 
+### Get demo products
+GET {{baseUrl}}/api/products
+Accept: application/json
+
 ### Get the root greeting
 GET {{baseUrl}}/

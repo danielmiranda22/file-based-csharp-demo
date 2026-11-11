@@ -5,7 +5,7 @@ using System.Text.Json.Serialization;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.ConfigureHttpJsonOptions(options =>
-    options.SerializerOptions.TypeInfoResolverChain.Insert(0, HealthJsonContext.Default));
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, ApiJsonContext.Default));
 
 var app = builder.Build();
 
@@ -16,12 +16,30 @@ app.MapGet("/api/health", () => TypedResults.Ok(new HealthResponse("ok")))
     .WithSummary("Checks whether the API is responding.")
     .Produces<HealthResponse>();
 
+var products = new[]
+{
+    new ProductResponse(1, "Keyboard", 49.99m),
+    new ProductResponse(2, "Mouse", 24.99m)
+};
+
+app.MapGet("/api/products", () => TypedResults.Ok(new ProductListResponse(products)))
+    .WithName("GetProducts")
+    .WithSummary("Returns the demo products.")
+    .Produces<ProductListResponse>();
+
 app.Run();
 
 /// <summary>Health information returned by the API.</summary>
 public sealed record HealthResponse(string Status);
 
+/// <summary>Product information returned by the API.</summary>
+public sealed record ProductResponse(int Id, string Name, decimal Price);
+
+/// <summary>A list of products returned by the API.</summary>
+public sealed record ProductListResponse(ProductResponse[] Products);
+
 [JsonSerializable(typeof(HealthResponse))]
-internal partial class HealthJsonContext : JsonSerializerContext
+[JsonSerializable(typeof(ProductListResponse))]
+internal partial class ApiJsonContext : JsonSerializerContext
 {
 }
