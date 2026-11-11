@@ -1,11 +1,14 @@
 #:package Microsoft.Extensions.Hosting@10.*
+#:package Spectre.Console@0.57.2
 
+using System.Globalization;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 
 var builder = Host.CreateApplicationBuilder(args);
 var apiBaseUrl = builder.Configuration["Api:BaseUrl"];
@@ -29,7 +32,7 @@ using var httpClient = new HttpClient
 var appJsonContext = new AppJsonContext(
     new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
-logger.LogInformation("Checking API health at {ApiBaseUrl}", apiBaseAddress);
+logger.LogDebug("Requesting API data from {ApiBaseUrl}", apiBaseAddress);
 
 try
 {
@@ -37,25 +40,33 @@ try
         "/api/health",
         appJsonContext.HealthResponse)
         ?? throw new InvalidOperationException("The API returned an empty health response.");
-    logger.LogInformation("API health: {Health}", health.Status);
+    AnsiConsole.MarkupLine($"[green]API health:[/] {Markup.Escape(health.Status)}");
 
     var productList = await httpClient.GetFromJsonAsync(
         "/api/products",
         appJsonContext.ProductListResponse)
         ?? throw new InvalidOperationException("The API returned an empty product list.");
 
+    var table = new Table();
+    table.AddColumn("ID");
+    table.AddColumn("Name");
+    table.AddColumn("Price");
+
     foreach (var product in productList.Products)
     {
-        logger.LogInformation(
-            "Product {ProductId}: {ProductName} - {Price}",
-            product.Id,
-            product.Name,
-            product.Price);
+        table.AddRow(
+            product.Id.ToString(CultureInfo.InvariantCulture),
+            Markup.Escape(product.Name),
+            product.Price.ToString("0.00", CultureInfo.InvariantCulture));
     }
+
+    AnsiConsole.Write(table);
 }
 catch (HttpRequestException exception)
 {
     logger.LogError(exception, "Could not reach the API at {ApiBaseUrl}", apiBaseAddress);
+    AnsiConsole.MarkupLine("[red]Could not reach the API.[/]");
+    AnsiConsole.MarkupLine("[dim]Check that Api.cs is running and Api:BaseUrl is correct.[/]");
     Environment.ExitCode = 1;
 }
 
