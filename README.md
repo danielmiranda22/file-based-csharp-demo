@@ -2,11 +2,11 @@
 
 This repo is a small example of running C# directly from `.cs` files, without creating a `.csproj` project.
 
-## What we are building
+## Projects
 
 There are two independent apps:
 
-- `Api.cs` is an ASP.NET Core API. It exposes `GET /api/health` and `GET /api/products`.
+- `Api.cs` is an ASP.NET Core API. It exposes health and product endpoints.
 - `App.cs` is a console app. It calls the API over HTTP, reads its JSON responses, and displays them with Spectre.Console.
 
 ```text
@@ -63,5 +63,6 @@ For another environment, environment variables can override these defaults: `ASP
 6. Return JSON from the API and read it in the client.
 7. Return demo products and display them in the client.
 8. Use Spectre.Console to present the results in the terminal.
+9. Get one product by ID and return `404` when it does not exist.
 
 `ApiJsonContext` and `AppJsonContext` provide JSON metadata for the API and client. Each app keeps its own types because they communicate over HTTP, not through shared C# types.

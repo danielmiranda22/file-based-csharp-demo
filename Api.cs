@@ -1,6 +1,8 @@
 #:sdk Microsoft.NET.Sdk.Web
 
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,6 +29,18 @@ app.MapGet("/api/products", () => TypedResults.Ok(new ProductListResponse(produc
     .WithSummary("Returns the demo products.")
     .Produces<ProductListResponse>();
 
+app.MapGet("/api/products/{id:int}", Results<Ok<ProductResponse>, NotFound> (int id) =>
+    {
+        var product = products.FirstOrDefault(product => product.Id == id);
+        return product is null
+            ? TypedResults.NotFound()
+            : TypedResults.Ok(product);
+    })
+    .WithName("GetProductById")
+    .WithSummary("Returns a product by ID.")
+    .Produces<ProductResponse>(StatusCodes.Status200OK)
+    .Produces(StatusCodes.Status404NotFound);
+
 app.Run();
 
 /// <summary>Health information returned by the API.</summary>
@@ -39,6 +53,7 @@ public sealed record ProductResponse(int Id, string Name, decimal Price);
 public sealed record ProductListResponse(ProductResponse[] Products);
 
 [JsonSerializable(typeof(HealthResponse))]
+[JsonSerializable(typeof(ProductResponse))]
 [JsonSerializable(typeof(ProductListResponse))]
 internal partial class ApiJsonContext : JsonSerializerContext
 {

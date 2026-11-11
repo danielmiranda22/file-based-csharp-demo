@@ -8,5 +8,13 @@ Accept: application/json
 GET {{baseUrl}}/api/products
 Accept: application/json
 
+### Get a product by ID
+GET {{baseUrl}}/api/products/1
+Accept: application/json
+
+### Unknown product returns 404
+GET {{baseUrl}}/api/products/999
+Accept: application/json
+
 ### Get the root greeting
 GET {{baseUrl}}/
