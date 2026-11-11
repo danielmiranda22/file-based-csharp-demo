@@ -1,17 +1,11 @@
-#:package Humanizer@2.*
 #:package Microsoft.Extensions.Hosting@10.*
 
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Humanizer;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-
-var date = new DateTime(2020, 1, 1);
-
-Console.WriteLine($"Hello, World! {date.Humanize()}");
 
 var builder = Host.CreateApplicationBuilder(args);
 var apiBaseUrl = builder.Configuration["Api:BaseUrl"];
@@ -32,7 +26,7 @@ using var httpClient = new HttpClient
     BaseAddress = apiBaseAddress
 };
 
-var healthJsonContext = new AppJsonContext(
+var appJsonContext = new AppJsonContext(
     new JsonSerializerOptions(JsonSerializerDefaults.Web));
 
 logger.LogInformation("Checking API health at {ApiBaseUrl}", apiBaseAddress);
@@ -41,9 +35,23 @@ try
 {
     var health = await httpClient.GetFromJsonAsync(
         "/api/health",
-        healthJsonContext.HealthResponse)
+        appJsonContext.HealthResponse)
         ?? throw new InvalidOperationException("The API returned an empty health response.");
     logger.LogInformation("API health: {Health}", health.Status);
+
+    var productList = await httpClient.GetFromJsonAsync(
+        "/api/products",
+        appJsonContext.ProductListResponse)
+        ?? throw new InvalidOperationException("The API returned an empty product list.");
+
+    foreach (var product in productList.Products)
+    {
+        logger.LogInformation(
+            "Product {ProductId}: {ProductName} - {Price}",
+            product.Id,
+            product.Name,
+            product.Price);
+    }
 }
 catch (HttpRequestException exception)
 {
@@ -54,7 +62,14 @@ catch (HttpRequestException exception)
 /// <summary>Health information returned by the API.</summary>
 public sealed record HealthResponse(string Status);
 
+/// <summary>Product information returned by the API.</summary>
+public sealed record ProductResponse(int Id, string Name, decimal Price);
+
+/// <summary>A list of products returned by the API.</summary>
+public sealed record ProductListResponse(ProductResponse[] Products);
+
 [JsonSerializable(typeof(HealthResponse))]
+[JsonSerializable(typeof(ProductListResponse))]
 internal partial class AppJsonContext : JsonSerializerContext
 {
 }
