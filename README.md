@@ -49,21 +49,9 @@ You can also find example requests for the API endpoints in `Api.http`.
 
 `App.cs` uses the .NET Generic Host. It provides logging and loads the API address from `appsettings.json`.
 
-The default address is `http://localhost:5000`. If you change the API port, set the matching environment variables in the two terminals:
+The API listens at `http://localhost:5000` by default, and `appsettings.json` gives the client the same address. No environment variables are needed for the local demo.
 
-```powershell
-# API terminal
-$env:ASPNETCORE_URLS = "http://localhost:5001"
-dotnet run .\Api.cs
-```
-
-```powershell
-# Client terminal
-$env:Api__BaseUrl = "http://localhost:5001"
-dotnet run .\App.cs
-```
-
-Environment variables override values from `appsettings.json`. You do not need to set them when using the default address.
+For another environment, environment variables can override these defaults: `ASPNETCORE_URLS` changes where the API listens, and `Api__BaseUrl` overrides `Api:BaseUrl` for the client. The two addresses must match.
 
 ## Demo steps
 
