@@ -42,6 +42,8 @@ dotnet run .\App.cs
 
 The client should log `API health: ok`.
 
+You can also find example requests for both API routes in `Api.http`.
+
 ## Configuration and logging
 
 `App.cs` uses the .NET Generic Host. It provides logging and loads the API address from `appsettings.json`.

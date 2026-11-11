@@ -1,0 +1,8 @@
+@baseUrl = http://localhost:5000
+
+### Check API health
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### Get the root greeting
+GET {{baseUrl}}/
